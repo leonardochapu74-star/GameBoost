@@ -1,0 +1,42 @@
+
+name: Compilar GameBoost
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Instalar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Preparar Android SDK
+        uses: android-actions/setup-android@v4
+
+      - name: Compilar GameBoost
+        run: |
+          unzip -q GameBoost-proyecto.zip -d proyecto
+          find proyecto -type f -name gradlew -print
+          cd proyecto/GameBoost-proyecto
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Guardar APK
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: GameBoost-APK
+          path: proyecto/GameBoost-proyecto/app/build/outputs/apk/debug/*.apk
+          
