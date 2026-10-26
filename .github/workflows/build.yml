@@ -31,11 +31,21 @@ jobs:
       - name: Preparar Android SDK
         uses: android-actions/setup-android@v4
 
-      - name: Compilar GameBoost
+      - name: Extraer proyecto
         run: |
           unzip -q GameBoost-proyecto.zip -d proyecto
+          find proyecto -name build.gradle -print
+
+      - name: Ajustar compatibilidad Android
+        run: |
           cd proyecto/GameBoost-proyecto
-          gradle assembleDebug
+          sed -i "s/minSdk [0-9]*/minSdk 24/" app/build.gradle
+          grep minSdk app/build.gradle
+
+      - name: Compilar APK
+        run: |
+          cd proyecto/GameBoost-proyecto
+          gradle assembleDebug --stacktrace
 
       - name: Guardar APK
         if: success()
